@@ -310,7 +310,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
 
         Log.w(TAG, "loading filepath: $filepath")
         player.addObserver(this)
-        player.initialize(filesDir.path)
+        player.initialize(filesDir.path, cacheDir.path)
         player.playFile(filepath)
 
         mediaSession = initMediaSession()
