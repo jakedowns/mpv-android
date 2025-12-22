@@ -10,8 +10,6 @@ import android.opengl.Matrix
 import android.util.AttributeSet
 import android.util.Log
 import androidx.preference.PreferenceManager
-
-//import `is`.xyz.mpv.MPVLib.MpvFormat.*
 import android.os.Build
 import android.os.Environment
 import android.view.*
@@ -37,15 +35,33 @@ internal class MPVView(context: Context, attrs: AttributeSet) : LeiaSurfaceView(
         this.filePath = filePath
     }
 
-    fun initialize(configDir: String) {
-        MPVLib.create(this.context)
+    /**
+     * Initialize libmpv.
+     *
+     * Call this once before the view is shown.
+     */
+    fun initialize(configDir: String, cacheDir: String) {
+        // For debugging, print out the available methods in MPVLib
+        val methods = MPVLib::class.java.declaredMethods.joinToString("\n") { it.name }
+        Log.d(TAG, "Available MPVLib methods:\n$methods")
+
+        MPVLib.create(context)
+
+        /* set normal options (user-supplied config can override) */
         MPVLib.setOptionString("config", "yes")
         MPVLib.setOptionString("config-dir", configDir)
-        initOptions() // do this before init() so user-supplied config can override our choices
+        for (opt in arrayOf("gpu-shader-cache-dir", "icc-cache-dir"))
+            MPVLib.setOptionString(opt, cacheDir)
+        initOptions()
+
         MPVLib.init()
-        // certain options are hardcoded:
-        MPVLib.setOptionString("save-position-on-quit", "no")
+
+        /* set hardcoded options */
+        postInitOptions()
+        // could mess up VO init before surfaceCreated() is called
         MPVLib.setOptionString("force-window", "no")
+        // need to idle at least once for playFile() logic to work
+        MPVLib.setOptionString("idle", "once")
 
         holder.addCallback(this)
         observeProperties()
@@ -77,17 +93,10 @@ internal class MPVView(context: Context, attrs: AttributeSet) : LeiaSurfaceView(
         MPVLib.setOptionString("profile", "fast")
 
         // vo
-        // NOTE: need to ask simon how to reach setVo in BaseMPVView
-//        setVo(if (sharedPreferences.getBoolean("gpu_next", false))
-//            "gpu-next"
-//        else
-//            "gpu")
-        // FOR NOW: just call the lib directly i guess?
         MPVLib.setOptionString("vo", if (sharedPreferences.getBoolean("gpu_next", false))
             "gpu-next"
         else
             "gpu")
-
 
         // hwdec
         val hwdec = if (sharedPreferences.getBoolean("hardware_decoding", true))
@@ -104,27 +113,27 @@ internal class MPVView(context: Context, attrs: AttributeSet) : LeiaSurfaceView(
             MPVLib.setOptionString("display-fps-override", refreshRate.toString())
         } else {
             Log.v(TAG, "Android version too old, disabling refresh rate functionality " +
-                       "(${Build.VERSION.SDK_INT} < ${Build.VERSION_CODES.M})")
+                    "(${Build.VERSION.SDK_INT} < ${Build.VERSION_CODES.M})")
         }
 
         // set non-complex options
         data class Property(val preferenceName: String, val mpvOption: String)
         val opts = arrayOf(
-                Property("default_audio_language", "alang"),
-                Property("default_subtitle_language", "slang"),
+            Property("default_audio_language", "alang"),
+            Property("default_subtitle_language", "slang"),
 
-                // vo-related
-                Property("video_scale", "scale"),
-                Property("video_scale_param1", "scale-param1"),
-                Property("video_scale_param2", "scale-param2"),
+            // vo-related
+            Property("video_scale", "scale"),
+            Property("video_scale_param1", "scale-param1"),
+            Property("video_scale_param2", "scale-param2"),
 
-                Property("video_downscale", "dscale"),
-                Property("video_downscale_param1", "dscale-param1"),
-                Property("video_downscale_param2", "dscale-param2"),
+            Property("video_downscale", "dscale"),
+            Property("video_downscale_param1", "dscale-param1"),
+            Property("video_downscale_param2", "dscale-param2"),
 
-                Property("video_tscale", "tscale"),
-                Property("video_tscale_param1", "tscale-param1"),
-                Property("video_tscale_param2", "tscale-param2")
+            Property("video_tscale", "tscale"),
+            Property("video_tscale_param1", "tscale-param1"),
+            Property("video_tscale_param2", "tscale-param2")
         )
 
         for ((preferenceName, mpvOption) in opts) {
@@ -264,6 +273,7 @@ internal class MPVView(context: Context, attrs: AttributeSet) : LeiaSurfaceView(
         for ((name, format) in p)
             MPVLib.observeProperty(name, format)
     }
+
     fun addObserver(o: MPVLib.EventObserver) {
         MPVLib.addObserver(o)
     }
@@ -273,9 +283,9 @@ internal class MPVView(context: Context, attrs: AttributeSet) : LeiaSurfaceView(
 
     data class Track(val mpvId: Int, val name: String)
     var tracks = mapOf<String, MutableList<Track>>(
-            "audio" to arrayListOf(),
-            "video" to arrayListOf(),
-            "sub" to arrayListOf())
+        "audio" to arrayListOf(),
+        "video" to arrayListOf(),
+        "sub" to arrayListOf())
 
     fun loadTracks() {
         for (list in tracks.values) {
@@ -303,8 +313,8 @@ internal class MPVView(context: Context, attrs: AttributeSet) : LeiaSurfaceView(
             else
                 context.getString(R.string.ui_track, mpvId)
             tracks.getValue(type).add(Track(
-                    mpvId=mpvId,
-                    name=trackName
+                mpvId=mpvId,
+                name=trackName
             ))
         }
     }
@@ -331,9 +341,9 @@ internal class MPVView(context: Context, attrs: AttributeSet) : LeiaSurfaceView(
             val title = MPVLib.getPropertyString("chapter-list/$i/title")
             val time = MPVLib.getPropertyDouble("chapter-list/$i/time")!!
             chapters.add(Chapter(
-                    index=i,
-                    title=title,
-                    time=time
+                index=i,
+                title=title,
+                time=time
             ))
         }
         return chapters
