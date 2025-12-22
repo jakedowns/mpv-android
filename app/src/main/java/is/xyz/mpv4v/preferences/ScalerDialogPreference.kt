@@ -1,4 +1,4 @@
-package `is`.xyz.mpv.preferences
+package `is`.xyz.mpv4v.preferences
 
 import android.content.Context
 import android.util.AttributeSet
@@ -7,8 +7,8 @@ import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
 import androidx.preference.Preference
 import com.google.android.material.textfield.MaterialAutoCompleteTextView
-import `is`.xyz.mpv.R
-import `is`.xyz.mpv.databinding.ScalerPrefBinding
+import `is`.xyz.mpv4v.R
+import `is`.xyz.mpv4v.databinding.ScalerPrefBinding
 
 class ScalerDialogPreference(
     context: Context,

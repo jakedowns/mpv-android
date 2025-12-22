@@ -1,4 +1,4 @@
-package `is`.xyz.mpv
+package `is`.xyz.mpv4v
 
 import android.content.Intent
 import android.net.Uri
@@ -7,7 +7,7 @@ import android.util.Base64
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import `is`.xyz.mpv.databinding.ActivityIntentTestBinding
+import `is`.xyz.mpv4v.databinding.ActivityIntentTestBinding
 
 class IntentTestActivity : AppCompatActivity() {
     private lateinit var binding: ActivityIntentTestBinding

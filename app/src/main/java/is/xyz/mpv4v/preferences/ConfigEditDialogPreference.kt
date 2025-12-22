@@ -1,4 +1,4 @@
-package `is`.xyz.mpv.preferences
+package `is`.xyz.mpv4v.preferences
 
 import android.content.Context
 import android.util.AttributeSet
@@ -6,8 +6,8 @@ import android.view.LayoutInflater
 import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
 import androidx.preference.Preference
-import `is`.xyz.mpv.R
-import `is`.xyz.mpv.databinding.ConfEditorBinding
+import `is`.xyz.mpv4v.R
+import `is`.xyz.mpv4v.databinding.ConfEditorBinding
 import java.io.File
 
 class ConfigEditDialogPreference(

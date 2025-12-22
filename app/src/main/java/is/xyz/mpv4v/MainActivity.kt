@@ -1,4 +1,4 @@
-package `is`.xyz.mpv
+package `is`.xyz.mpv4v
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity

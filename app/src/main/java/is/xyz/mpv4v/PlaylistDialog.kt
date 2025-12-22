@@ -1,6 +1,6 @@
-package `is`.xyz.mpv
+package `is`.xyz.mpv4v
 
-import `is`.xyz.mpv.databinding.DialogPlaylistBinding
+import `is`.xyz.mpv4v.databinding.DialogPlaylistBinding
 import android.content.res.ColorStateList
 import android.graphics.Typeface
 import android.util.Log

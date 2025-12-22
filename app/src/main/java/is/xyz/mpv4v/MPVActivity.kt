@@ -1,7 +1,7 @@
-package `is`.xyz.mpv
+package `is`.xyz.mpv4v
 
-import `is`.xyz.mpv.databinding.PlayerBinding
-import `is`.xyz.mpv.MPVLib.MpvEvent
+import `is`.xyz.mpv4v.databinding.PlayerBinding
+import `is`.xyz.mpv4v.MPVLib.MpvEvent
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.annotation.SuppressLint
@@ -308,8 +308,9 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
             return
         }
 
+        Log.w(TAG, "loading filepath: $filepath")
         player.addObserver(this)
-        player.initialize(filesDir.path, cacheDir.path)
+        player.initialize(filesDir.path)
         player.playFile(filepath)
 
         mediaSession = initMediaSession()
@@ -2136,7 +2137,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
         private const val RCODE_EXTERNAL_SUB = 1001
         private const val RCODE_LOAD_FILE = 1002
         // action of result intent
-        private const val RESULT_INTENT = "is.xyz.mpv.MPVActivity.result"
+        private const val RESULT_INTENT = "is.xyz.mpv4v.MPVActivity.result"
         // stream type used with AudioManager
         private const val STREAM_TYPE = AudioManager.STREAM_MUSIC
         // precision used by seekbar (1/s)

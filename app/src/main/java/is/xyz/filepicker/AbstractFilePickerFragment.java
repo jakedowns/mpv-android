@@ -6,7 +6,7 @@
 
 package is.xyz.filepicker;
 
-import is.xyz.mpv.R;
+import is.xyz.mpv4v.R;
 
 import android.content.Context;
 import android.content.res.TypedArray;

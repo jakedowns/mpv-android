@@ -37,7 +37,7 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace 'is.xyz.mpv'
+    namespace 'is.xyz.mpv4v'
     compileSdk 35
 
     compileOptions {
@@ -86,7 +86,7 @@ android {
                     'src/main/jniLibs',
                     './../distribution/leia_sdk/lib'
             ]
-            java.srcDirs = ['src']
+            java.srcDirs = ['src/main/java']
         }
     }
 

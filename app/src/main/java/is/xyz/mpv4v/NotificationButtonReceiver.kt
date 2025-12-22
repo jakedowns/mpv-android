@@ -1,4 +1,4 @@
-package `is`.xyz.mpv
+package `is`.xyz.mpv4v
 
 import android.app.PendingIntent
 import android.content.BroadcastReceiver

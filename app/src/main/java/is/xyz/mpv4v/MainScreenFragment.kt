@@ -1,8 +1,8 @@
-package `is`.xyz.mpv
+package `is`.xyz.mpv4v
 
 import `is`.xyz.filepicker.DocumentPickerFragment
-import `is`.xyz.mpv.preferences.PreferenceActivity
-import `is`.xyz.mpv.databinding.FragmentMainScreenBinding
+import `is`.xyz.mpv4v.preferences.PreferenceActivity
+import `is`.xyz.mpv4v.databinding.FragmentMainScreenBinding
 import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.Intent

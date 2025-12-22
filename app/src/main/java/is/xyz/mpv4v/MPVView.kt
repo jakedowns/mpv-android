@@ -1,4 +1,4 @@
-package `is`.xyz.mpv
+package `is`.xyz.mpv4v
 
 /**
  * NOTE: this view was changed from SurfaceView to LeiaSurfaceView for LP2 support
@@ -9,27 +9,33 @@ import android.graphics.SurfaceTexture
 import android.opengl.Matrix
 import android.util.AttributeSet
 import android.util.Log
+import androidx.preference.PreferenceManager
 
-import `is`.xyz.mpv.MPVLib.mpvFormat.*
+//import `is`.xyz.mpv4v.MPVLib.MpvFormat.*
 import android.os.Build
 import android.os.Environment
-import android.preference.PreferenceManager
-import android.util.AttributeSet
-import android.util.Log
 import android.view.*
 import com.simongellis.leia.webxr.LeiaSurfaceView
 import androidx.core.content.ContextCompat
-import `is`.xyz.mpv.MPVLib.MpvFormat.MPV_FORMAT_DOUBLE
-import `is`.xyz.mpv.MPVLib.MpvFormat.MPV_FORMAT_FLAG
-import `is`.xyz.mpv.MPVLib.MpvFormat.MPV_FORMAT_INT64
-import `is`.xyz.mpv.MPVLib.MpvFormat.MPV_FORMAT_NONE
-import `is`.xyz.mpv.MPVLib.MpvFormat.MPV_FORMAT_STRING
+import `is`.xyz.mpv4v.MPVLib.MpvFormat.MPV_FORMAT_DOUBLE
+import `is`.xyz.mpv4v.MPVLib.MpvFormat.MPV_FORMAT_FLAG
+import `is`.xyz.mpv4v.MPVLib.MpvFormat.MPV_FORMAT_INT64
+import `is`.xyz.mpv4v.MPVLib.MpvFormat.MPV_FORMAT_NONE
+import `is`.xyz.mpv4v.MPVLib.MpvFormat.MPV_FORMAT_STRING
 import kotlin.reflect.KProperty
 
 internal class MPVView(context: Context, attrs: AttributeSet) : LeiaSurfaceView(context, attrs), SurfaceHolder.Callback {
 
     private val mainSurfaceTexture = SurfaceTexture(false)
     private val mainSurface: Surface = Surface(mainSurfaceTexture)
+    private var filePath: String? = null
+
+    /**
+     * Set the first file to be played once the player is ready.
+     */
+    fun playFile(filePath: String) {
+        this.filePath = filePath
+    }
 
     fun initialize(configDir: String) {
         MPVLib.create(this.context)
@@ -52,17 +58,36 @@ internal class MPVView(context: Context, attrs: AttributeSet) : LeiaSurfaceView(
         addTexture(mainSurfaceTexture, identity)
     }
 
-    override fun initOptions() {
+    /**
+     * Deinitialize libmpv.
+     *
+     * Call this once before the view is destroyed.
+     */
+    fun destroy() {
+        // Disable surface callbacks to avoid using uninitialized mpv state
+        holder.removeCallback(this)
+
+        MPVLib.destroy()
+    }
+
+    fun initOptions() {
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
 
         // apply phone-optimized defaults
         MPVLib.setOptionString("profile", "fast")
 
         // vo
-        setVo(if (sharedPreferences.getBoolean("gpu_next", false))
+        // NOTE: need to ask simon how to reach setVo in BaseMPVView
+//        setVo(if (sharedPreferences.getBoolean("gpu_next", false))
+//            "gpu-next"
+//        else
+//            "gpu")
+        // FOR NOW: just call the lib directly i guess?
+        MPVLib.setOptionString("vo", if (sharedPreferences.getBoolean("gpu_next", false))
             "gpu-next"
         else
             "gpu")
+
 
         // hwdec
         val hwdec = if (sharedPreferences.getBoolean("hardware_decoding", true))
@@ -151,7 +176,7 @@ internal class MPVView(context: Context, attrs: AttributeSet) : LeiaSurfaceView(
         MPVLib.setOptionString("vd-lavc-film-grain", "cpu")
     }
 
-    override fun postInitOptions() {
+    fun postInitOptions() {
         // we need to call write-watch-later manually
         MPVLib.setOptionString("save-position-on-quit", "no")
     }
@@ -211,7 +236,7 @@ internal class MPVView(context: Context, attrs: AttributeSet) : LeiaSurfaceView(
         return true
     }
 
-    override fun observeProperties() {
+    fun observeProperties() {
         // This observes all properties needed by MPVView, MPVActivity or other classes
         data class Property(val name: String, val format: Int = MPV_FORMAT_NONE)
         val p = arrayOf(
