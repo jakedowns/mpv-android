@@ -53,12 +53,12 @@
 		<h5>Kotlin</h5>
 		<pre>val intent = Intent(Intent.ACTION_VIEW)
 intent.setDataAndType(Uri.parse("https://example.org/media.png"), "video/any")
-intent.setPackage("is.xyz.mpv")
+intent.setPackage("is.xyz.mpv4v")
 val subtitle = Uri.parse("https://example.org/subtitle.srt")
 intent.putExtra("subs", arrayOf&lt;Uri&gt;(subtitle))
 startActivity(intent)</pre>
 		<h5>HTML (Chrome)</h5>
-		<pre>&lt;a href="intent://example.org/media.png#Intent;type=video/any;package=is.xyz.mpv;scheme=https;end;"&gt;Click me&lt;/a&gt;</pre>
+		<pre>&lt;a href="intent://example.org/media.png#Intent;type=video/any;package=is.xyz.mpv4v;scheme=https;end;"&gt;Click me&lt;/a&gt;</pre>
 		<h5>Command line (e.g. adb or Termux)</h5>
 		<pre>am start -a android.intent.action.VIEW -t video/any -p is.xyz.mpv -d "https://example.org/media.png" </pre>
 		</div>
