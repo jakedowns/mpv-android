@@ -1,6 +1,6 @@
-package `is`.xyz.mpv4v
+package `is`.xyz.mpv
 
-import `is`.xyz.mpv4v.databinding.DialogSliderBinding
+import `is`.xyz.mpv.databinding.DialogSliderBinding
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.SeekBar

@@ -1,7 +1,7 @@
-package `is`.xyz.mpv4v
+package `is`.xyz.mpv
 
-import `is`.xyz.mpv4v.databinding.PlayerBinding
-import `is`.xyz.mpv4v.MPVLib.MpvEvent
+import `is`.xyz.mpv.databinding.PlayerBinding
+import `is`.xyz.mpv.MPVLib.MpvEvent
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.annotation.SuppressLint
@@ -320,7 +320,12 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
         audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
         val audioSessionId = audioManager!!.generateAudioSessionId()
         if (audioSessionId != AudioManager.ERROR)
-            player.setAudioSessionId(audioSessionId)
+            try {
+                player.setAudioSessionId(audioSessionId)
+            } catch (e: Exception) {
+                Log.w(TAG, "Error setting audio session id to $audioSessionId")
+                Log.w(TAG, e)
+            }
         else
             Log.w(TAG, "AudioManager.generateAudioSessionId() returned error")
 
@@ -2137,7 +2142,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
         private const val RCODE_EXTERNAL_SUB = 1001
         private const val RCODE_LOAD_FILE = 1002
         // action of result intent
-        private const val RESULT_INTENT = "is.xyz.mpv4v.MPVActivity.result"
+        private const val RESULT_INTENT = "is.xyz.mpv.MPVActivity.result"
         // stream type used with AudioManager
         private const val STREAM_TYPE = AudioManager.STREAM_MUSIC
         // precision used by seekbar (1/s)

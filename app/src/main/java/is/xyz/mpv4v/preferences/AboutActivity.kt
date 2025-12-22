@@ -1,4 +1,4 @@
-package `is`.xyz.mpv4v.preferences
+package `is`.xyz.mpv.preferences
 
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
@@ -7,11 +7,11 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.preference.PreferenceManager
 import com.google.android.material.color.DynamicColors
-import `is`.xyz.mpv4v.BuildConfig
-import `is`.xyz.mpv4v.MPVLib
-import `is`.xyz.mpv4v.MPVLib.MpvLogLevel
-import `is`.xyz.mpv4v.R
-import `is`.xyz.mpv4v.databinding.ActivityAboutBinding
+import `is`.xyz.mpv.BuildConfig
+import `is`.xyz.mpv.MPVLib
+import `is`.xyz.mpv.MPVLib.MpvLogLevel
+import `is`.xyz.mpv.R
+import `is`.xyz.mpv.databinding.ActivityAboutBinding
 
 class AboutActivity : AppCompatActivity(), MPVLib.LogObserver {
     private lateinit var binding: ActivityAboutBinding

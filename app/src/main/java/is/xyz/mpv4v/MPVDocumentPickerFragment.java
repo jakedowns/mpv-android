@@ -1,4 +1,4 @@
-package is.xyz.mpv4v;
+package is.xyz.mpv;
 
 import android.net.Uri;
 import android.view.View;

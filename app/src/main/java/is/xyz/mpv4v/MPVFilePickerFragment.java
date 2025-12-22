@@ -1,4 +1,4 @@
-package is.xyz.mpv4v;
+package is.xyz.mpv;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;

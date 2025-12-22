@@ -1,6 +1,6 @@
-package `is`.xyz.mpv4v
+package `is`.xyz.mpv
 
-import `is`.xyz.mpv4v.databinding.DialogDecimalBinding
+import `is`.xyz.mpv.databinding.DialogDecimalBinding
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater

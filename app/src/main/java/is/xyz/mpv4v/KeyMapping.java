@@ -1,4 +1,4 @@
-package is.xyz.mpv4v;
+package is.xyz.mpv;
 
 // Mapping between Android and mpv keycodes (special keys)
 

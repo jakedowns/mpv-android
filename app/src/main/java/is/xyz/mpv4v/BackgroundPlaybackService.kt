@@ -1,4 +1,4 @@
-package `is`.xyz.mpv4v
+package `is`.xyz.mpv
 
 import android.annotation.SuppressLint
 import android.app.*
@@ -18,7 +18,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.PendingIntentCompat
 import androidx.core.app.ServiceCompat
 import androidx.media.app.NotificationCompat.MediaStyle
-import `is`.xyz.mpv4v.MPVLib.MpvEvent
+import `is`.xyz.mpv.MPVLib.MpvEvent
 
 /*
     All this service does is

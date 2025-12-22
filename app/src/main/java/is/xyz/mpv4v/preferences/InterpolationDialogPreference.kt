@@ -1,4 +1,4 @@
-package `is`.xyz.mpv4v.preferences
+package `is`.xyz.mpv.preferences
 
 import android.content.Context
 import android.util.AttributeSet
@@ -8,8 +8,8 @@ import androidx.core.widget.addTextChangedListener
 import androidx.preference.Preference
 import com.google.android.material.materialswitch.MaterialSwitch
 import com.google.android.material.textfield.MaterialAutoCompleteTextView
-import `is`.xyz.mpv4v.R
-import `is`.xyz.mpv4v.databinding.InterpolationPrefBinding
+import `is`.xyz.mpv.R
+import `is`.xyz.mpv.databinding.InterpolationPrefBinding
 
 class InterpolationDialogPreference(
     context: Context,

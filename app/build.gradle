@@ -37,7 +37,7 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace 'is.xyz.mpv4v'
+    namespace 'is.xyz.mpv'
     compileSdk 35
 
     compileOptions {

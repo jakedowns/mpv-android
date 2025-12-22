@@ -1,4 +1,4 @@
-package `is`.xyz.mpv4v
+package `is`.xyz.mpv
 
 import `is`.xyz.filepicker.AbstractFilePickerFragment
 import `is`.xyz.filepicker.FilePickerFragment
@@ -24,7 +24,7 @@ import androidx.core.view.WindowCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.RecyclerView
 import `is`.xyz.filepicker.DocumentPickerFragment
-import `is`.xyz.mpv4v.databinding.FragmentFilepickerChoiceBinding
+import `is`.xyz.mpv.databinding.FragmentFilepickerChoiceBinding
 import java.io.File
 import java.io.FileFilter
 

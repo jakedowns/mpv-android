@@ -1,11 +1,11 @@
-package `is`.xyz.mpv4v
+package `is`.xyz.mpv
 
 import android.media.MediaCodecInfo
 import android.media.MediaCodecList
 import android.os.Build
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import `is`.xyz.mpv4v.databinding.ActivityCodecInfoBinding
+import `is`.xyz.mpv.databinding.ActivityCodecInfoBinding
 
 class CodecInfoActivity : AppCompatActivity() {
     private lateinit var binding: ActivityCodecInfoBinding

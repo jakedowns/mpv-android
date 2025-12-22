@@ -8,13 +8,13 @@
         android:summary="@string/pref_gpu_next_summary"
         android:title="@string/pref_gpu_next_title" />
 
-    <is.xyz.mpv4v.preferences.ConfigEditDialogPreference
+    <is.xyz.mpv.preferences.ConfigEditDialogPreference
         app:iconSpaceReserved="false"
         app:filename="mpv.conf"
         android:title="@string/pref_edit_mpv_conf"
         app:dialogMessage="@string/pref_edit_mpv_conf_message" />
 
-    <is.xyz.mpv4v.preferences.ConfigEditDialogPreference
+    <is.xyz.mpv.preferences.ConfigEditDialogPreference
         app:iconSpaceReserved="false"
         app:filename="input.conf"
         android:title="@string/pref_edit_input_conf"
