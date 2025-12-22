@@ -16,6 +16,7 @@ getdeps () {
 
 loadarch () {
 	unset CC CXX CPATH LIBRARY_PATH C_INCLUDE_PATH CPLUS_INCLUDE_PATH
+	unset CFLAGS CXXFLAGS CPPFLAGS LDFLAGS
 
 	local apilvl=21
 	# ndk_triple: what the toolchain actually is
@@ -41,7 +42,7 @@ loadarch () {
 		cc_triple=$ndk_triple$apilvl
 		prefix_name=x86_64
 	else
-		echo "Invalid architecture"
+		echo "Invalid architecture" >&2
 		exit 1
 	fi
 	export prefix_dir="$PWD/prefix/$prefix_name"
@@ -52,6 +53,7 @@ loadarch () {
 		export CC=$cc_triple-gcc
 		export CXX=$cc_triple-g++
 	fi
+	export LDFLAGS="-Wl,-O1,--icf=safe -Wl,-z,max-page-size=16384"
 	export AR=llvm-ar
 	export RANLIB=llvm-ranlib
 }
@@ -67,6 +69,11 @@ setup_prefix () {
 	local cpu_family=${ndk_triple%%-*}
 	[ "$cpu_family" == "i686" ] && cpu_family=x86
 
+	if ! command -v pkg-config >/dev/null; then
+		echo "pkg-config not provided!"
+		return 1
+	fi
+
 	# meson wants to be spoonfed this file, so create it ahead of time
 	# also define: release build, static libs and no source downloads at runtime(!!!)
 	cat >"$prefix_dir/crossfile.tmp" <<CROSSFILE
@@ -74,12 +81,15 @@ setup_prefix () {
 buildtype = 'release'
 default_library = 'static'
 wrap_mode = 'nodownload'
+prefix = '/usr/local'
 [binaries]
 c = '$CC'
 cpp = '$CXX'
 ar = 'llvm-ar'
+nm = 'llvm-nm'
 strip = 'llvm-strip'
 pkgconfig = 'pkg-config'
+pkg-config = 'pkg-config'
 [host_machine]
 system = 'android'
 cpu_family = '$cpu_family'
@@ -148,6 +158,10 @@ while [ $# -gt 0 ]; do
 		;;
 		-h|--help)
 		usage
+		;;
+		-*)
+		echo "Unknown flag $1" >&2
+		exit 1
 		;;
 		*)
 		target=$1

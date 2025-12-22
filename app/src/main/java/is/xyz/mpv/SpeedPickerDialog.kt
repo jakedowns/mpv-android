@@ -6,7 +6,7 @@ import android.view.View
 import android.widget.SeekBar
 import kotlin.math.max
 
-class SpeedPickerDialog : PickerDialog {
+internal class SpeedPickerDialog : PickerDialog {
     companion object {
         // Middle point of bar (in progress units)
         private const val HALF = 100.0
@@ -46,6 +46,9 @@ class SpeedPickerDialog : PickerDialog {
             override fun onStartTrackingTouch(p0: SeekBar?) {}
             override fun onStopTrackingTouch(p0: SeekBar?) {}
         })
+        binding.resetBtn.setOnClickListener {
+            number = 1.0
+        }
         binding.textView.isAllCaps = true // match appearance in controls
 
         return binding.root

@@ -15,11 +15,16 @@ fi
 
 unset CC CXX # meson wants these unset
 
-meson $build --cross-file "$prefix_dir"/crossfile.txt \
+meson setup $build --cross-file "$prefix_dir"/crossfile.txt \
 	--default-library shared \
 	-Diconv=disabled -Dlua=enabled \
 	-Dlibmpv=true -Dcplayer=false \
 	-Dmanpage-build=disabled
 
 ninja -C $build -j$cores
+if [ -f $build/libmpv.a ]; then
+	echo >&2 "Meson fucked up, forcing rebuild."
+	$0 clean
+	exec $0 build
+fi
 DESTDIR="$prefix_dir" ninja -C $build install

@@ -16,6 +16,8 @@ else
 	exit 255
 fi
 
+[ -n "$ANDROID_SIGNING_KEY" ] && BUNDLE=1
+
 nativeprefix () {
 	if [ -f $BUILD/prefix/$1/lib/libmpv.so ]; then
 		echo $BUILD/prefix/$1
@@ -24,15 +26,27 @@ nativeprefix () {
 	fi
 }
 
+prefix32=$(nativeprefix "armv7l")
 prefix64=$(nativeprefix "arm64")
 prefix_x64=$(nativeprefix "x86_64")
 prefix_x86=$(nativeprefix "x86")
 
-PREFIX=$BUILD/prefix/armv7l PREFIX64=$prefix64 PREFIX_X64=$prefix_x64 PREFIX_X86=$prefix_x86 \
-ndk-build -C app/src/main -j$cores
-./gradlew assembleDebug assembleRelease
+if [[ -z "$prefix32" && -z "$prefix64" && -z "$prefix_x64" && -z "$prefix_x86" ]]; then
+	echo >&2 "Error: no mpv library detected."
+	exit 255
+fi
 
-if [ -n "${ANDROID_SIGNING_KEY:-}" ]; then
+PREFIX32=$prefix32 PREFIX64=$prefix64 PREFIX_X64=$prefix_x64 PREFIX_X86=$prefix_x86 \
+ndk-build -C app/src/main -j$cores
+
+targets=(assembleDebug)
+if [ -z "$DONT_BUILD_RELEASE" ]; then
+	targets+=(assembleRelease)
+	[ -n "$BUNDLE" ] && targets+=(bundleRelease)
+fi
+./gradlew "${targets[@]}"
+
+if [ -n "$ANDROID_SIGNING_KEY" ]; then
 	cd "${MPV_ANDROID}/app/build/outputs/apk"
 	apksigner=${ANDROID_HOME}/build-tools/${v_sdk_build_tools}/apksigner
 	for v in default api29; do
@@ -47,4 +61,17 @@ if [ -n "${ANDROID_SIGNING_KEY:-}" ]; then
 		done
 		popd
 	done
+	# and the bundle
+	cd ../bundle
+	if [ -n "$BUNDLE" ]; then
+		if [ -z "$ANDROID_SIGNING_ALIAS" ]; then
+			echo >&2 "Error: ANDROID_SIGNING_ALIAS must be set to use jarsigner"
+			exit 1
+		fi
+		pushd defaultRelease
+		jarsigner -keystore "${ANDROID_SIGNING_KEY}" -signedjar \
+			app-default-release-signed.aab app-default-release.aab \
+			"${ANDROID_SIGNING_ALIAS}"
+		popd
+	fi
 fi

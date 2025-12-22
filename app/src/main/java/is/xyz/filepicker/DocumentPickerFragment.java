@@ -6,8 +6,11 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.DocumentsContract;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.util.Predicate;
 import androidx.loader.content.AsyncTaskLoader;
 import androidx.loader.content.Loader;
 
@@ -18,7 +21,7 @@ import java.util.List;
 
 /**
  * An implementation of the picker that operates on a document tree.
- *
+ * <br>
  * See also:
  * - https://developer.android.com/training/data-storage/shared/documents-files
  * - https://developer.android.com/reference/android/provider/DocumentsContract.Document#MIME_TYPE_DIR
@@ -30,11 +33,15 @@ public class DocumentPickerFragment extends AbstractFilePickerFragment<Uri> {
     // The structure of the file picker assumes that only the file URIs matter and you can
     // grab additional info for free afterwards. This is not the case with the documents API so we
     // have to work around it.
-    final HashMap<Uri, Document> mLastRead;
+    private final HashMap<Uri, Document> mLastRead;
+    // maps document ID of directories to parent path
+    private final HashMap<String, Uri> mParents;
+    protected Predicate<Document> mFilterPredicate;
 
     public DocumentPickerFragment(@NonNull Uri root) {
         mRoot = root;
         mLastRead = new HashMap<>();
+        mParents = new HashMap<>();
     }
 
     /**
@@ -57,6 +64,25 @@ public class DocumentPickerFragment extends AbstractFilePickerFragment<Uri> {
         }
     }
 
+    /**
+     * This method is used to set the filter that determines the documents to be shown
+     *
+     * @param predicate filter implementation or null
+     */
+    public void setFilterPredicate(@Nullable Predicate<Document> predicate) {
+        this.mFilterPredicate = predicate;
+        refresh(mCurrentPath);
+    }
+
+    /**
+     * Returns the filter that determines the documents to be shown
+     *
+     * @return filter implementation or null
+     */
+    public @Nullable Predicate<Document> getFilterPredicate() {
+        return this.mFilterPredicate;
+    }
+
     @Override
     public boolean isDir(@NonNull Uri path) {
         Document doc = mLastRead.get(path);
@@ -65,6 +91,7 @@ public class DocumentPickerFragment extends AbstractFilePickerFragment<Uri> {
         }
 
         // retrieve the data uncached (not supposed to happen)
+        Log.w(TAG, "isDir(): uncached read");
         return isDir(requireContext(), path);
     }
 
@@ -108,30 +135,28 @@ public class DocumentPickerFragment extends AbstractFilePickerFragment<Uri> {
 
     @NonNull
     @Override
-    public Uri toUri(@NonNull Uri path) {
-        return path;
-    }
-
-    @NonNull
-    @Override
     public Uri getParent(@NonNull Uri from) {
-        Document doc = mLastRead.get(from);
-        if (doc != null) {
-            return doc.parent;
-        }
-        // This is not supposed to happen
+        // root path is a tree and would error if given to getDocumentId(), catch that early
+        if (from.equals(getRoot()))
+            return getRoot();
+
+        String docId = DocumentsContract.getDocumentId(from);
+        Uri parent = mParents.get(docId);
+        if (parent != null)
+            return parent;
+        Log.e(TAG, "getParent() has not seen this document before");
         return getRoot();
     }
 
     @NonNull
     @Override
-    public String getFullPath(@NonNull Uri path) {
+    public String pathToString(@NonNull Uri path) {
         return path.toString();
     }
 
     @NonNull
     @Override
-    public Uri getPath(@NonNull String path) {
+    public Uri pathFromString(@NonNull String path) {
         return Uri.parse(path);
     }
 
@@ -148,7 +173,7 @@ public class DocumentPickerFragment extends AbstractFilePickerFragment<Uri> {
         final Uri currentPath = mCurrentPath;
 
         // totally makes sense!
-        final String docId = mCurrentPath.equals(root) ? DocumentsContract.getTreeDocumentId(currentPath) :
+        final String docId = currentPath.equals(root) ? DocumentsContract.getTreeDocumentId(currentPath) :
                 DocumentsContract.getDocumentId(currentPath);
         final Uri childUri = DocumentsContract.buildChildDocumentsUriUsingTree(root, docId);
 
@@ -157,7 +182,7 @@ public class DocumentPickerFragment extends AbstractFilePickerFragment<Uri> {
                 DocumentsContract.Document.COLUMN_MIME_TYPE,
                 DocumentsContract.Document.COLUMN_DISPLAY_NAME,
         };
-        return new AsyncTaskLoader<List<Uri>>(requireContext()) {
+        return new AsyncTaskLoader<>(requireContext()) {
             @Override
             public List<Uri> loadInBackground() {
                 final ContentResolver contentResolver = getContext().getContentResolver();
@@ -169,13 +194,23 @@ public class DocumentPickerFragment extends AbstractFilePickerFragment<Uri> {
                 ArrayList<Document> files = new ArrayList<>();
                 final int i1 = c.getColumnIndex(cols[0]), i2 = c.getColumnIndex(cols[1]), i3 = c.getColumnIndex(cols[2]);
                 while (c.moveToNext()) {
-                    // TODO later: support FileFilter equivalent here
-                    files.add(new Document(
-                            DocumentsContract.buildDocumentUriUsingTree(root, c.getString(i1)),
-                            currentPath,
-                            c.getString(i2).equals(DocumentsContract.Document.MIME_TYPE_DIR),
+                    final String docId = c.getString(i1);
+                    final boolean isDir = c.getString(i2).equals(DocumentsContract.Document.MIME_TYPE_DIR);
+                    final Document doc = new Document(
+                            DocumentsContract.buildDocumentUriUsingTree(root, docId),
+                            isDir,
                             c.getString(i3)
-                    ));
+                    );
+                    if (mFilterPredicate != null && !mFilterPredicate.test(doc))
+                        continue;
+                    files.add(doc);
+
+                    // There is no generic way to get a parent directory for another directory and this
+                    // can't be solved via mLastRead either, since by the time someone asks getParent()
+                    // we're already inside the new directory. Not to mention that this would be insufficient
+                    // when going back multiple times.
+                    if (isDir)
+                        mParents.put(docId, currentPath);
                 }
                 c.close();
 
@@ -204,17 +239,29 @@ public class DocumentPickerFragment extends AbstractFilePickerFragment<Uri> {
      * Class that represents a document.
      * Wrapper around a content:// URI but with extra information provided at no extra cost (cached).
      */
-    private static class Document implements Comparable<Document> {
+    public static class Document implements Comparable<Document> {
         private final @NonNull Uri uri;
-        private final @NonNull Uri parent;
         private final boolean isDir;
         private final @NonNull String displayName;
 
-        private Document(@NonNull Uri uri, @NonNull Uri parent, boolean dir, @NonNull String name) {
+        private Document(@NonNull Uri uri, boolean dir, @NonNull String name) {
             this.uri = uri;
-            this.parent = parent;
             isDir = dir;
             displayName = name;
+        }
+
+        @NonNull
+        public Uri getUri() {
+            return uri;
+        }
+
+        public boolean isDirectory() {
+            return isDir;
+        }
+
+        @NonNull
+        public String getDisplayName() {
+            return displayName;
         }
 
         @Override
@@ -228,13 +275,11 @@ public class DocumentPickerFragment extends AbstractFilePickerFragment<Uri> {
         // Sort directories before files, alphabetically otherwise
         @Override
         public int compareTo(Document other) {
-            if (isDir && !other.isDir) {
-                return -1;
-            } else if (other.isDir && !isDir) {
-                return 1;
-            } else {
-                return displayName.compareToIgnoreCase(other.displayName);
-            }
+            if (isDir != other.isDir)
+                return other.isDir ? 1 : -1;
+            return displayName.compareToIgnoreCase(other.displayName);
         }
     }
+
+    private static final String TAG = "mpv";
 }

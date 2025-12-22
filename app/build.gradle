@@ -2,6 +2,7 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 
 ext.abiCodes = ["armeabi-v7a": 1, "arm64-v8a": 2, "x86":3, "x86_64":4]
+ext.universalBase = 8000
 
 repositories {
     maven {
@@ -37,7 +38,7 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     namespace 'is.xyz.mpv'
-    compileSdkVersion 33
+    compileSdk 35
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -50,10 +51,13 @@ android {
 
     defaultConfig {
         buildToolsVersion "31.0.0"
+
         minSdkVersion 30
-        targetSdkVersion 31
-        versionCode 33
+        targetSdk 35
+
+        versionCode 43
         versionName "2023-05-09-release"
+
         vectorDrawables.useSupportLibrary = true
 
         ndk.abiFilters = ["arm64-v8a"]
@@ -95,6 +99,7 @@ android {
 
     buildFeatures {
         viewBinding = true
+        buildConfig = true
     }
 
     splits {
@@ -109,6 +114,15 @@ android {
             universalApk true // build an APK with all ABIs too
         }
     }
+
+    // https://youtrack.jetbrains.com/issue/KT-55947
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
+        kotlinOptions.jvmTarget = JavaVersion.VERSION_11.toString()
+    }
 }
 
 // Map versionCode so each ABI gets a different one
@@ -117,17 +131,21 @@ import com.android.build.VariantOutput
 android.applicationVariants.all { variant ->
     variant.outputs.each { output ->
         def base = project.ext.abiCodes.get(output.getFilter(VariantOutput.ABI))
-        // universal APK keeps the original versionCode
+        // universal APK just gets a constant added to it
         if (base != null)
             output.versionCodeOverride = base * 1000 + variant.versionCode
+        else
+            output.versionCodeOverride = universalBase + variant.versionCode
     }
 }
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    implementation 'androidx.appcompat:appcompat:1.6.0'
-    implementation 'androidx.recyclerview:recyclerview:1.2.1'
+    implementation 'androidx.appcompat:appcompat:1.7.1'
+    implementation 'androidx.recyclerview:recyclerview:1.4.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.2'
     implementation files("../leia-cnsdk/cnsdk.aar")
-    implementation 'androidx.media:media:1.6.0'
+    implementation 'androidx.media:media:1.7.0'
+    implementation 'androidx.preference:preference-ktx:1.2.1'
+    implementation 'com.google.android.material:material:1.12.0'
 }

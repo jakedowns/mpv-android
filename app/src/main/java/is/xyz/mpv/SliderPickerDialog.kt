@@ -6,7 +6,7 @@ import android.view.View
 import android.widget.SeekBar
 import androidx.annotation.StringRes
 
-class SliderPickerDialog(
+internal class SliderPickerDialog(
     private val rangeMin: Double, private val rangeMax: Double, private val intScale: Int,
     @StringRes private val formatTextRes: Int
 ) : PickerDialog {
@@ -30,6 +30,9 @@ class SliderPickerDialog(
             override fun onStartTrackingTouch(p0: SeekBar?) {}
             override fun onStopTrackingTouch(p0: SeekBar?) {}
         })
+        binding.resetBtn.setOnClickListener {
+            number = rangeMin + (rangeMax - rangeMin) / 2 // works for us
+        }
 
         return binding.root
     }

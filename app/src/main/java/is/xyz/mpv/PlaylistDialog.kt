@@ -52,8 +52,17 @@ internal class PlaylistDialog(private val player: MPVView) {
         selectedIndex = MPVLib.getPropertyInt("playlist-pos") ?: -1
         playlist = player.loadPlaylist()
         Log.v(TAG, "PlaylistDialog: loaded ${playlist.size} items")
-        (binding.list.adapter as RecyclerView.Adapter).notifyDataSetChanged()
+        binding.list.adapter!!.notifyDataSetChanged()
         binding.list.scrollToPosition(playlist.indexOfFirst { it.index == selectedIndex })
+
+        /*
+         * At least on api 33 there is in some cases a (reproducible) bug, where the space below the
+         * recycler view for the two buttons is not taken into account and they go out-of-bounds of the
+         * alert dialog. This fixes it.
+         */
+        binding.list.post {
+            binding.list.parent.requestLayout()
+        }
 
         val accent = ContextCompat.getColor(binding.root.context, R.color.accent)
         val disabled = ContextCompat.getColor(binding.root.context, R.color.alpha_disabled)
@@ -84,12 +93,11 @@ internal class PlaylistDialog(private val player: MPVView) {
         class ViewHolder(private val parent: PlaylistDialog, view: View) :
             RecyclerView.ViewHolder(view) {
             private val textView: TextView
-            var selfPosition: Int = -1
 
             init {
                 textView = view.findViewById(android.R.id.text1)
                 view.setOnClickListener {
-                    parent.clickItem(selfPosition)
+                    parent.clickItem(bindingAdapterPosition)
                 }
             }
 
@@ -102,12 +110,10 @@ internal class PlaylistDialog(private val player: MPVView) {
         override fun onCreateViewHolder(viewGroup: ViewGroup, viewType: Int): ViewHolder {
             val view = LayoutInflater.from(viewGroup.context)
                 .inflate(R.layout.dialog_playlist_item, viewGroup, false)
-
             return ViewHolder(parent, view)
         }
 
         override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
-            viewHolder.selfPosition = position
             val item = parent.playlist[position]
             viewHolder.bind(item, item.index == parent.selectedIndex)
         }

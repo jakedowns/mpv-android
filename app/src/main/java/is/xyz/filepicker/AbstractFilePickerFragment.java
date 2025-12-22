@@ -71,6 +71,7 @@ public abstract class AbstractFilePickerFragment<T> extends Fragment
         recyclerView = (RecyclerView) view.findViewById(android.R.id.list);
         // improve performance if you know that changes in content
         // do not change the size of the RecyclerView
+        //noinspection InvalidSetHasFixedSize
         recyclerView.setHasFixedSize(true);
         // use a linear layout manager
         layoutManager = new LinearLayoutManager(getActivity());
@@ -226,7 +227,7 @@ public abstract class AbstractFilePickerFragment<T> extends Fragment
         mFiles = data;
         mAdapter.setList(data);
         onChangePath(mCurrentPath);
-        String key = mCurrentPath.toString();
+        String key = pathToString(mCurrentPath);
         if (mPositionMap.containsKey(key))
             layoutManager.scrollToPositionWithOffset(mPositionMap.get(key), 0);
         else
@@ -314,13 +315,20 @@ public abstract class AbstractFilePickerFragment<T> extends Fragment
     }
 
     /**
+     * Returns the directory currently being viewed.
+     */
+    public T getCurrentDir() {
+        return mCurrentPath;
+    }
+
+    /**
      * Browses to the parent directory from the current directory. For example, if the current
      * directory is /foo/bar/, then goUp() will change the current directory to /foo/. It is up to
      * the caller to not call this in vain, e.g. if you are already at the root.
      * <p/>
      */
     public void goUp() {
-        String key = mCurrentPath.toString();
+        String key = pathToString(mCurrentPath);
         mPositionMap.remove(key);
         goToDir(getParent(mCurrentPath), false);
     }
@@ -333,7 +341,7 @@ public abstract class AbstractFilePickerFragment<T> extends Fragment
      */
     public void onClickDir(@NonNull View view, @NonNull DirViewHolder viewHolder) {
         if (isDir(viewHolder.file)) {
-            String key = mCurrentPath.toString();
+            String key = pathToString(mCurrentPath);
             mPositionMap.put(key, layoutManager.findFirstVisibleItemPosition());
             goToDir(viewHolder.file, false);
         }

@@ -4,6 +4,7 @@
 <resources>
     <!-- Simple strings. -->
     <string name="mpv_activity">mpv</string>
+    <string name="label_share_intent">在 mpv 中播放</string>
     <string name="title_activity_settings">设置</string>
     <string name="dialog_ok">确定</string>
     <string name="dialog_cancel">取消</string>
@@ -12,9 +13,14 @@
     <string name="dialog_no">否</string>
     <string name="dialog_prev">上一个</string>
     <string name="dialog_next">下一个</string>
+    <string name="dialog_reset">重置</string>
     <string name="track_audio">音频</string>
     <string name="track_subs">字幕</string>
     <string name="track_off">关</string>
+    <string name="track_primary">主要</string>
+    <string name="track_secondary">次要</string>
+    <string name="btn_play">播放</string>
+    <string name="btn_pause">暂停</string>
     <string name="ui_volume">音量: %d%%</string>
     <string name="ui_brightness">亮度: %d%%</string>
     <string name="ui_seek_distance">%1$s\n[%2$s]</string>
@@ -34,7 +40,7 @@
     <string name="exit_warning_playlist">播放列表中还有 %d 项。\n您确定要退出吗？</string>
     <string name="contrast">对比度</string>
     <string name="video_brightness">视频亮度</string>
-    <string name="gamma">Gamma</string>
+    <string name="gamma">伽马值</string>
     <string name="saturation">饱和度</string>
     <string name="aspect_ratio">纵横比</string>
     <string name="audio_delay">音频延迟</string>
@@ -43,7 +49,9 @@
     <string name="notice_show_media_files">仅显示媒体文件</string>
 
     <!-- Action buttons -->
-    <string name="switch_orientation">切换方向</string>
+    <string name="option_remember_choice">记住选择于下次启动</string>
+    <string name="uri_invalid_protocol">无效的协议</string>
+    <string name="switch_orientation">切换显示方向</string>
     <string name="open_external_audio">打开外部音频…</string>
     <string name="open_external_sub">打开外部字幕…</string>
     <string name="action_playlist">播放列表</string>
@@ -54,21 +62,25 @@
     <string name="sub_seek_button">按字幕定位</string>
     <string name="action_settings">设置</string>
     <string name="action_open_url">打开 URL</string>
-    <string name="action_pick_file">选择文件</string>
+    <string name="action_pick_file">打开文件</string>
+    <string name="action_pick_file_old">打开文件 (旧版)</string>
     <string name="action_external_storage">外部存储</string>
     <string name="action_toggle_filter">切换过滤器</string>
+    <string name="action_open_doc">打开目录</string>
+    <string name="action_open_doc_tree">打开目录树</string>
+    <string name="file_picker_old">文件选择器\n（旧版）</string>
 
     <!-- Strings related to Settings -->
     <string name="pref_header_general">常规</string>
 
     <string name="pref_default_file_manager_path_title">默认文件管理器路径</string>
-    <string name="pref_default_file_manager_path_hint">设置初始文件管理器路径</string>
 
+    <string name="pref_material_you_theming_summary">使用动态颜色</string>
     <string name="pref_default_audio_language_title">默认音频语言</string>
     <string name="pref_default_audio_language_message">选择播放带有多个音频流的视频时默认选择的音频语言。\n容器通常使用两或三个字母的语言代码。多个值可以用逗号分隔。</string>
 
     <string name="pref_default_subtitle_language_title">默认字幕语言</string>
-    <string name="pref_default_subtitle_language_message">选择播放带有多个字幕的视频时默认选择的字幕语言。多个值可以用逗号分隔。\n容器通常使用两或三个字母的语言代码。多个值可以用逗号分隔。</string>
+    <string name="pref_default_subtitle_language_message">选择播放带有多个字幕的视频时默认选择的字幕语言。\n容器通常使用两或三个字母的语言代码。多个值可以用逗号分隔。</string>
 
     <string name="pref_hardware_decoding_title">硬件解码</string>
     <string name="pref_hardware_decoding_summary">选择此项将在回退到软件解码之前尝试硬件解码</string>
@@ -88,13 +100,19 @@
     <string name="pref_bottom_controls_title">在屏幕底部显示控制栏</string>
 
 
+    <string name="pref_header_ui">用户界面</string>
     <string name="pref_header_gestures">触摸屏手势</string>
 
+    <string name="pref_no_ui_pause_title">弹出UI部件时保持播放</string>
+    <string name="pref_no_ui_pause_summary">当打开弹出式UI部件时保持播放。</string>
+    <string name="pref_playlist_exit_warning_title">播放列表时退出前确认</string>
+    <string name="pref_playlist_exit_warning_summary">当加载了一个播放列表时在退出前显示确认对话框。</string>
+    <string name="pref_seek_gesture_smooth_title">更平滑的播放定位</string>
     <string name="pref_gesture_horiz_title">水平拖拽</string>
 
-    <string name="pref_gesture_vert_left_title">垂直拖拽（左）</string>
+    <string name="pref_gesture_vert_left_title">垂直拖拽（左边）</string>
 
-    <string name="pref_gesture_vert_right_title">垂直拖拽（右）</string>
+    <string name="pref_gesture_vert_right_title">垂直拖拽（右边）</string>
 
     <string name="pref_gesture_tap_left_title">双击（左）</string>
 
@@ -104,22 +122,23 @@
 
     <string name="pref_header_video">视频</string>
 
-    <string name="pref_video_upscale_title">上采样滤波器</string>
+    <string name="pref_gesture_custom_helptext">当一个触摸屏手势被设置为“自定义”时，它可以通过编辑 input.conf 来绑定任意命令行为。这些按键代码分别为 <b>0x10001</b>(左)，<b>0x10002</b>(中)，<b>0x10003</b>(右)。\n比如你可以绑定命令快进6s：\n\t\t0x10003 no-osd seek 6</string>
+    <string name="pref_video_upscale_title">图像采样放大过滤器</string>
 
-    <string name="pref_video_downscale_title">下采样滤波器</string>
+    <string name="pref_video_downscale_title">图像采样缩小过滤器</string>
 
     <string name="pref_video_debanding_title">去色带</string>
-    <string name="pref_video_debanding_summary">选择视频去色带模式</string>
+    <string name="pref_video_debanding_summary">选择一项视频去色带模式</string>
 
-    <string name="pref_video_interpolation_title">插值</string>
+    <string name="pref_video_interpolation_title">视频插值</string>
     <string name="pref_video_interpolation_message">减少由视频帧率与显示刷新率不匹配引起的抖动。</string>
 
-    <string name="pref_video_tscale_title">时间插值滤波器</string>
-    <string name="pref_video_tscale_summary">选择用于时间轴（帧）插值的滤波器</string>
-    <string name="pref_video_tscale_message">这些设置仅在以上滤波器启用时生效。</string>
+    <string name="pref_video_tscale_title">时序插值过滤器</string>
+    <string name="pref_video_tscale_summary">选择用于时间轴（帧）插值的过滤器</string>
+    <string name="pref_video_tscale_message">这些设置仅在以上过滤器启用时生效。</string>
 
     <string name="pref_video_fastdecode_title">低质量视频解码</string>
-    <string name="pref_video_fastdecode_summary">以质量换取速度从而流畅播放。\n<b>会严重降低质量</b></string>
+    <string name="pref_video_fastdecode_summary">以更低质量换取更好性能从而更流畅地播放。\n<b>这会严重降低视频质量</b></string>
 
     <string name="pref_header_developer">开发者</string>
 
@@ -134,21 +153,26 @@
 
     <string name="pref_header_advanced">高级</string>
 
+    <string name="pref_gpu_next_title">使用 gpu-next</string>
+    <string name="pref_gpu_next_summary">使用新的视频渲染后端，基于 libplacebo。</string>
     <string name="pref_version_info">版本信息</string>
 
     <string name="pref_edit_mpv_conf">编辑 mpv.conf</string>
     <string name="pref_edit_mpv_conf_message">您可以在这里直接编辑 mpv 的配置。</string>
 
     <string name="pref_edit_input_conf">编辑 input.conf</string>
-    <string name="pref_edit_input_conf_message">您可以在这里编辑 input.conf，这主要用于电视遥控和键盘。\n\n重要：mpv-android 有些硬编码的键盘处理程序不能在这里重新定义，例如 \'j\' 用于循环字幕。</string>
+    <string name="pref_edit_input_conf_message">您可以在这里编辑 input.conf，主要在自定义电视遥控和键盘控制方面很有用。\n\n重要：mpv-android 有些硬编码的键盘处理程序不能在这里重新定义，例如 \'j\' 用于循环字幕。</string>
 
     <!-- Strings used in Settings dialog preferences -->
-    <string name="scaler_param1">参数 1：</string>
-    <string name="scaler_param2">参数 2：</string>
+    <string name="scaler_filter">过滤器函数</string>
+    <string name="scaler_param1">参数 1</string>
+    <string name="scaler_param2">参数 2</string>
     <string name="interpolation_switch">启用插值</string>
-    <string name="interpolation_video_sync">视频同步：</string>
+    <string name="interpolation_video_sync">视频同步</string>
 
     <!-- File picker -->
     <string name="nnf_name">名称</string>
-    <string name="nnf_permission_external_write_denied">访问文件系统的权限被拒绝</string>
+    <string name="nnf_permission_external_write_denied">访问文件系统权限未被准许</string>
+    <string name="pref_header_about_mpv">关于 mpv</string>
+    <string name="pref_material_you_theming_title">Material You</string>
 </resources>

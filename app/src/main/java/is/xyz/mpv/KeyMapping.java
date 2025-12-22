@@ -3,10 +3,9 @@ package is.xyz.mpv;
 // Mapping between Android and mpv keycodes (special keys)
 
 import android.util.SparseArray;
-
 import static android.view.KeyEvent.*;
 
-public class KeyMapping {
+class KeyMapping {
     public static final SparseArray<String> map = new SparseArray<>();
 
     static {
@@ -50,6 +49,8 @@ public class KeyMapping {
         map.put(KEYCODE_MEDIA_RECORD, "RECORD");
         map.put(KEYCODE_CHANNEL_UP, "CHANNEL_UP");
         map.put(KEYCODE_CHANNEL_DOWN, "CHANNEL_DOWN");
+        map.put(KEYCODE_ZOOM_IN, "ZOOMIN");
+        map.put(KEYCODE_ZOOM_OUT, "ZOOMOUT");
 
         map.put(KEYCODE_F1, "F1");
         map.put(KEYCODE_F2, "F2");
@@ -76,5 +77,11 @@ public class KeyMapping {
         map.put(KEYCODE_NUMPAD_9, "KP9");
         map.put(KEYCODE_NUMPAD_DOT, "KP_DEC");
         map.put(KEYCODE_NUMPAD_ENTER, "KP_ENTER");
+
+        // Special mapping of programmable colour keys
+        map.put(KEYCODE_PROG_RED, "F13");
+        map.put(KEYCODE_PROG_GREEN, "F14");
+        map.put(KEYCODE_PROG_YELLOW, "F15");
+        map.put(KEYCODE_PROG_BLUE, "F16");
     }
 }

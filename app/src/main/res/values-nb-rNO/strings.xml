@@ -20,7 +20,6 @@
     <string name="pref_header_general">Generelt</string>
 
     <string name="pref_default_file_manager_path_title">Sti til forvalgt filutforsker</string>
-    <string name="pref_default_file_manager_path_hint">Velg forvalgt filutforsker-sti</string>
 
     <string name="pref_default_audio_language_title">Forvalgt talespråk</string>
 
@@ -68,7 +67,7 @@
     <string name="pref_stats_mode_title">Vis statistikk</string>
     <string name="pref_stats_mode_summary">Velg hvilken statistikk vises</string>
     <string name="interpolation_switch">Aktiver interpolering</string>
-    <string name="interpolation_video_sync">Videosynkronisering:</string>
+    <string name="interpolation_video_sync">Videosynkronisering</string>
     <string name="nnf_name">Navn</string>
     <string name="nnf_permission_external_write_denied">Tillatelse til å få tilgang filsystemet nektes</string>
 </resources>

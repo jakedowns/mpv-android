@@ -9,21 +9,23 @@ package is.xyz.filepicker;
 import is.xyz.mpv.R;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.pm.PackageManager;
-import android.net.Uri;
+import android.os.Build;
 import android.os.FileObserver;
+import android.util.Log;
+import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.loader.content.AsyncTaskLoader;
 import androidx.core.content.ContextCompat;
 import androidx.loader.content.Loader;
-import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -32,7 +34,14 @@ import java.util.List;
  */
 public class FilePickerFragment extends AbstractFilePickerFragment<File> {
 
-    protected static final int PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 1;
+    protected static final int PERMISSIONS_REQUEST_ID = 1001;
+    protected static final String PERMISSION_PRE33 = Manifest.permission.WRITE_EXTERNAL_STORAGE;
+    @RequiresApi(33)
+    protected static final String[] PERMISSIONS_POST33 = {
+            Manifest.permission.READ_MEDIA_AUDIO,
+            Manifest.permission.READ_MEDIA_IMAGES,
+            Manifest.permission.READ_MEDIA_VIDEO,
+    };
     protected boolean showHiddenItems = false;
     protected FileFilter filterPredicate = null;
     private File mRequestedPath = null;
@@ -81,11 +90,25 @@ public class FilePickerFragment extends AbstractFilePickerFragment<File> {
     /**
      * @return true if app has been granted permission to write to the SD-card.
      */
+    public static boolean hasPermission(@NonNull Context context, @NonNull File path) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            // user can choose to grant at least one
+            for (String permission : PERMISSIONS_POST33) {
+                if (PackageManager.PERMISSION_GRANTED ==
+                        ContextCompat.checkSelfPermission(context, permission)) {
+                    return true;
+                }
+            }
+            return false;
+        } else {
+            return PackageManager.PERMISSION_GRANTED ==
+                    ContextCompat.checkSelfPermission(context, PERMISSION_PRE33);
+        }
+    }
+
     @Override
     protected boolean hasPermission(@NonNull File path) {
-        return PackageManager.PERMISSION_GRANTED ==
-                ContextCompat.checkSelfPermission(getContext(),
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        return hasPermission(requireContext(), path);
     }
 
     /**
@@ -93,15 +116,12 @@ public class FilePickerFragment extends AbstractFilePickerFragment<File> {
      */
     @Override
     protected void handlePermission(@NonNull File path) {
-//         Should we show an explanation?
-//        if (shouldShowRequestPermissionRationale(
-//                Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-//             Explain to the user why we need permission
-//        }
-
         mRequestedPath = path;
-        requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            requestPermissions(PERMISSIONS_POST33, PERMISSIONS_REQUEST_ID);
+        } else {
+            requestPermissions(new String[]{PERMISSION_PRE33}, PERMISSIONS_REQUEST_ID);
+        }
     }
 
     /**
@@ -116,26 +136,32 @@ public class FilePickerFragment extends AbstractFilePickerFragment<File> {
     public void onRequestPermissionsResult(int requestCode,
                                            @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
+        if (requestCode != PERMISSIONS_REQUEST_ID)
+            return;
         // If arrays are empty, then process was cancelled
         if (permissions.length == 0) {
             // Treat this as a cancel press
-            if (mListener != null) {
+            if (mListener != null)
                 mListener.onCancelled();
+            return;
+        }
+        boolean ok = false;
+        for (int r : grantResults) {
+            if (PackageManager.PERMISSION_GRANTED == r) {
+                ok = true;
+                break;
             }
-        } else { // if (requestCode == PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE) {
-            if (PackageManager.PERMISSION_GRANTED == grantResults[0]) {
-                // Do refresh
-                if (mRequestedPath != null) {
-                    refresh(mRequestedPath);
-                }
-            } else {
-                Toast.makeText(getContext(), R.string.nnf_permission_external_write_denied,
-                        Toast.LENGTH_SHORT).show();
-                // Treat this as a cancel press
-                if (mListener != null) {
-                    mListener.onCancelled();
-                }
-            }
+        }
+        if (ok) {
+            // Do refresh
+            if (mRequestedPath != null)
+                refresh(mRequestedPath);
+        } else {
+            Toast.makeText(getContext(), R.string.nnf_permission_external_write_denied,
+                    Toast.LENGTH_SHORT).show();
+            // Treat this as a cancel press
+            if (mListener != null)
+                mListener.onCancelled();
         }
     }
 
@@ -188,7 +214,7 @@ public class FilePickerFragment extends AbstractFilePickerFragment<File> {
      */
     @NonNull
     @Override
-    public File getPath(@NonNull final String path) {
+    public File pathFromString(@NonNull final String path) {
         return new File(path);
     }
 
@@ -198,7 +224,7 @@ public class FilePickerFragment extends AbstractFilePickerFragment<File> {
      */
     @NonNull
     @Override
-    public String getFullPath(@NonNull final File path) {
+    public String pathToString(@NonNull final File path) {
         return path.getPath();
     }
 
@@ -214,36 +240,24 @@ public class FilePickerFragment extends AbstractFilePickerFragment<File> {
     }
 
     /**
-     * Convert the path to a URI for the return intent
-     *
-     * @param file either a file or directory
-     * @return a Uri
-     */
-    @NonNull
-    @Override
-    public Uri toUri(@NonNull final File file) {
-        return Uri.fromFile(file);
-    }
-
-    /**
      * Get a loader that lists the Files in the current path,
      * and monitors changes.
      */
     @NonNull
     @Override
     public Loader<List<File>> getLoader() {
-        return new AsyncTaskLoader<List<File>>(getActivity()) {
-
+        return new AsyncTaskLoader<>(requireContext()) {
             FileObserver fileObserver;
 
             @Override
             public List<File> loadInBackground() {
                 File[] listFiles = mCurrentPath.listFiles();
-                if (listFiles == null)
+                if (listFiles == null) {
+                    Log.e(TAG, "FilePickerFragment: IO error while listing files");
                     return new ArrayList<>(0);
+                }
 
                 ArrayList<File> files = new ArrayList<>(listFiles.length);
-
                 for (File f : listFiles) {
                     if (f.isHidden() && !areHiddenItemsShown())
                         continue;
@@ -252,12 +266,7 @@ public class FilePickerFragment extends AbstractFilePickerFragment<File> {
                     files.add(f);
                 }
 
-                Collections.sort(files, new Comparator<File>() {
-                    @Override
-                    public int compare(File lhs, File rhs) {
-                        return compareFiles(lhs, rhs);
-                    }
-                });
+                Collections.sort(files, (lhs, rhs) -> compareFiles(lhs, rhs));
 
                 return files;
             }
@@ -321,12 +330,11 @@ public class FilePickerFragment extends AbstractFilePickerFragment<File> {
      * and 1 if rhs should be placed before lhs
      */
     protected int compareFiles(@NonNull File lhs, @NonNull File rhs) {
-        if (lhs.isDirectory() && !rhs.isDirectory()) {
-            return -1;
-        } else if (rhs.isDirectory() && !lhs.isDirectory()) {
-            return 1;
-        } else {
-            return lhs.getName().compareToIgnoreCase(rhs.getName());
-        }
+        final boolean ldir = lhs.isDirectory(), rdir = rhs.isDirectory();
+        if (ldir != rdir)
+            return rdir ? 1 : -1;
+        return lhs.getName().compareToIgnoreCase(rhs.getName());
     }
+
+    private static final String TAG = "mpv";
 }

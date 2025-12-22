@@ -6,7 +6,6 @@
 
 package is.xyz.filepicker;
 
-import android.net.Uri;
 import androidx.annotation.NonNull;
 import androidx.loader.content.Loader;
 import androidx.recyclerview.widget.RecyclerView;
@@ -38,37 +37,25 @@ public interface LogicHandler<T> {
     String getName(@NonNull final T path);
 
     /**
-     * Convert the path to a URI for the return intent
-     *
-     * @param path
-     * @return a Uri
-     */
-    @NonNull
-    Uri toUri(@NonNull final T path);
-
-    /**
      * Return the path to the parent directory. Should return the root if
      * from is root.
      *
-     * @param from
+     * @param from path to a directory
      */
     @NonNull
     T getParent(@NonNull final T from);
 
     /**
-     * @param path
-     * @return the full path to the file
+     * Convert path to a string representation.
      */
     @NonNull
-    String getFullPath(@NonNull final T path);
+    String pathToString(@NonNull final T path);
 
     /**
-     * Convert the path to the type used.
-     *
-     * @param path
+     * Convert string representation back to a path.
      */
     @NonNull
-    T getPath(@NonNull final String path);
+    T pathFromString(@NonNull final String path);
 
     /**
      * Get the root path (lowest allowed).
