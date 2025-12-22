@@ -320,12 +320,7 @@ class MPVActivity : AppCompatActivity(), MPVLib.EventObserver, TouchGesturesObse
         audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
         val audioSessionId = audioManager!!.generateAudioSessionId()
         if (audioSessionId != AudioManager.ERROR)
-            try {
-                player.setAudioSessionId(audioSessionId)
-            } catch (e: Exception) {
-                Log.w(TAG, "Error setting audio session id to $audioSessionId")
-                Log.w(TAG, e)
-            }
+            player.setAudioSessionId(audioSessionId)
         else
             Log.w(TAG, "AudioManager.generateAudioSessionId() returned error")
 
